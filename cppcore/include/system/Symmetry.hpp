@@ -37,6 +37,7 @@ public:
     std::vector<Translation> translations(Foundation const& foundation) const;
     void apply(Foundation& foundation) const;
 
+    Cartesian const& get_length() const { return length;};
     explicit operator bool() const { return enabled_directions != Vector3b{false, false, false}; }
 
 private:

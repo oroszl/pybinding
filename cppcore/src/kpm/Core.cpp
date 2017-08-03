@@ -116,9 +116,9 @@ std::vector<ArrayXcd> Core::greens_vector(idx_t row, std::vector<idx_t> const& c
     }
 }
 
-ArrayXcd Core::conductivity(ArrayXf const& left_coords, ArrayXf const& right_coords,
-                            ArrayXd const& chemical_potential, double broadening,
-                            double temperature, idx_t num_random, idx_t num_points) {
+ArrayXcd Core::conductivity(ArrayXf const &left_coords, ArrayXf const &right_coords,
+                            std::vector<float> periodicity, ArrayXd const &chemical_potential,
+                            double broadening, double temperature, idx_t num_random, idx_t num_points) {
     auto const scale = bounds.scaling_factors();
     auto const num_moments = config.kernel.required_num_moments(broadening / scale.a);
 
@@ -129,12 +129,12 @@ ArrayXcd Core::conductivity(ArrayXf const& left_coords, ArrayXf const& right_coo
     stats.reset(num_moments, optimized_hamiltonian, specialized_algorithm, num_random);
 
     // On the left, the velocity operator is only applied to the starter
-    auto starter_l = random_starter(optimized_hamiltonian, velocity(hamiltonian, left_coords));
+    auto starter_l = random_starter(optimized_hamiltonian, velocity(hamiltonian, left_coords, periodicity[0]));
     auto moments_l = DenseMatrixMoments(num_moments);
 
     // On the right, the operator is applied at collection time to each vector
     auto starter_r = random_starter(optimized_hamiltonian);
-    auto moments_r = DenseMatrixMoments(num_moments, velocity(hamiltonian, right_coords));
+    auto moments_r = DenseMatrixMoments(num_moments, velocity(hamiltonian, right_coords, periodicity[1]));
 
     auto total_mu = MomentMultiplication(num_moments, optimized_hamiltonian.scalar_tag());
     for (auto j = 0; j < num_random; ++j) {

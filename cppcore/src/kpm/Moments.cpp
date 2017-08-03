@@ -151,7 +151,40 @@ struct Velocity {
     }
 };
 
-VariantCSR velocity(Hamiltonian const& hamiltonian, ArrayXf const& alpha) {
+struct Velocity_periodic {
+    ArrayXf const& alpha;
+    float periodicity;
+
+    template<class scalar_t>
+    VariantCSR operator()(SparseMatrixRC<scalar_t> const& ham) const {
+        auto result = *ham;
+        auto const data = result.valuePtr();
+        auto const indices = result.innerIndexPtr();
+        auto const indptr = result.outerIndexPtr();
+
+        auto const size = result.rows();
+        for (auto row = idx_t{0}; row < size; ++row) {
+            for (auto n = indptr[row]; n < indptr[row + 1]; ++n) {
+                const auto col = indices[n];
+                auto distance = alpha[row] - alpha[col];
+                if (distance > 0.5 * periodicity){
+                    distance -= periodicity;
+                } else if (distance < -0.5 * periodicity){
+                    distance += periodicity;
+                }
+                data[n] *= static_cast<scalar_t>(distance);
+            }
+        }
+
+        return std::move(result);
+    }
+};
+
+VariantCSR velocity(Hamiltonian const& hamiltonian, ArrayXf const& alpha, float period) {
+    if (period > 0.){
+        return var::apply_visitor(Velocity_periodic{alpha, period}, hamiltonian.get_variant());
+    }
+
     return var::apply_visitor(Velocity{alpha}, hamiltonian.get_variant());
 }
 

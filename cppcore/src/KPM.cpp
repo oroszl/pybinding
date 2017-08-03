@@ -1,3 +1,4 @@
+#include <iostream>
 #include "KPM.hpp"
 
 using namespace fmt::literals;
@@ -136,13 +137,19 @@ ArrayXd KPM::calc_conductivity(ArrayXd const& chemical_potential, double broaden
         throw std::logic_error("Invalid direction: must be 'xx', 'xy', 'zz', or similar.");
     }
 
+    Cartesian periodic_length = model.get_symmetry().get_length();
+    auto map_periodic = std::unordered_map<char, int>{{'x', 0}, {'y', 1}, {'z', 2}};
+    std::vector<float> periodicity = {periodic_length(map_periodic[direction[0]]),
+                                      periodic_length(map_periodic[direction[1]])};
+
     auto const& system = *model.system();
     auto const& p = model.is_multiorbital() ? system.expanded_positions() : system.positions;
     auto map = std::unordered_map<char, ArrayXf const*>{{'x', &p.x}, {'y', &p.y}, {'z', &p.z}};
 
     calculation_timer.tic();
-    auto result = core.conductivity(*map[direction[0]], *map[direction[1]], chemical_potential,
-                                    broadening, temperature, num_random, num_points);
+    auto result = core.conductivity(*map[direction[0]], *map[direction[1]], periodicity,
+                                    chemical_potential, broadening, temperature, num_random,
+                                    num_points);
     calculation_timer.toc();
     return result.real();
 }
