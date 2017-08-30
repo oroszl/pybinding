@@ -85,7 +85,7 @@ struct GreensFunction {
 };
 
 /// Reconstruct the Kubo-Bastin formula for the conductivity:
-///     sigma(mu, T) = 4 / a^2 * int_-1^1 fd(E) / (1 - E^2)^2 sum(momenta * gamma(E)) dE
+///     sigma(mu, T) = 8 / a^2 * int_-1^1 fd(E) / (1 - E^2)^2 sum(momenta * gamma(E)) dE
 /// The resulting conductivity is in units of `e^2 / h * Omega` where Omega is the volume.
 struct KuboBastin {
     ArrayXd const& chemical_pot;
@@ -135,7 +135,7 @@ struct KuboBastin {
             return k * sum(moments.array() * gamma(en));
         });
 
-        auto const prefix = scalar_t{4} / (scale.a * scale.a);
+        auto const prefix = scalar_t{8} / (scale.a * scale.a);
         return transform<ArrayX>(scaled_chemical_potential, [&](real_t mu) {
             return prefix * integrate(fermi_dirac(mu) * sum_nm);
         }).template cast<std::complex<double>>();
