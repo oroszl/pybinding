@@ -6,7 +6,7 @@
   elements on the main diagonal were zero ([#5](https://github.com/dean0x7d/pybinding/issues/5)),
   hopping terms were being applied asymmetrically for large multi-orbital systems
   ([#6](https://github.com/dean0x7d/pybinding/issues/6)). Thanks to
-  [@oroszl (László Oroszlány)](https://github.com/oroszl) for reporting the issues.
+  [@oroszl (Laszlo Oroszlany)](https://github.com/oroszl) for reporting the issues.
 
 * Fixed KPM Hamiltonian scaling for models with all zeros on the main diagonal but asymmetric
   spectrum bounds (non-zero KPM scaling factor `b`).
